@@ -1,0 +1,142 @@
+#version 4
+
+struct ssid {
+	uint32_t ssid_len;
+	of_octets_t ssid; /* 0-32 octets of BSSID, padded to 4-byte alignment */
+};
+
+struct hw_addr {
+	uint8_t byte_1;
+	uint8_t byte_2;
+	uint8_t byte_3;
+	uint8_t byte_4;
+	uint8_t byte_5;	
+	uint8_t byte_6;	
+};
+
+struct lvap {
+	hw_addr_t client_hw_addr;
+	pad(1);
+	uint8_t ip_version == ?;
+	ssid_t bssid;
+	uint32_t ssid_cnt;
+	list(ssid_t) ssids; /* 'ssid_cnt' many SSIDs*/
+};
+
+struct lvap_ipv4 {
+	hw_addr_t client_hw_addr;
+	pad(1);
+	uint8_t ip_version == 4;
+	of_ipv4_t inet_addr;
+	ssid_t bssid;
+	uint32_t ssid_cnt;
+	list(ssid_t) ssids; /* 'ssid_cnt' many SSIDs*/
+};
+
+struct lvap_ipv6 {
+	hw_addr_t client_hw_addr;
+	pad(1);
+	uint8_t ip_version == 6;
+	of_ipv6_t inet_addr;
+	ssid_t bssid;
+	uint32_t ssid_cnt;
+	list(ssid_t) ssids; /* 'ssid_cnt' many SSIDs*/
+};
+
+struct of_odin_header : of_experimenter 
+{
+	uint8_t version == 0x04;
+	uint8_t type == 4;
+	uint16_t length;
+	uint32_t xid;
+	uint32_t experimenter == 0x0D1171;
+	uint32_t subtype == ?;
+	uint8_t odinproto_version == 1;
+	pad(3);
+};
+
+struct of_odin_hello : of_odin_header
+{
+	uint8_t version == 0x04;
+	uint8_t type == 4;
+	uint16_t length;
+	uint32_t xid;
+	uint32_t experimenter == 0x0D1171;
+	uint32_t subtype == 0x01;
+	uint8_t odinproto_version == 1;
+	pad(3);
+};
+
+struct of_odin_probe : of_odin_header
+{
+	uint8_t version == 0x04;
+	uint8_t type == 4;
+	uint16_t length;
+	uint32_t xid;
+	uint32_t experimenter == 0x0D1171;
+	uint32_t subtype == 0x02;
+	uint8_t odinproto_version == 1;
+	pad(3);
+	hw_addr_t client_hw_addr;
+	pad(2);
+	ssid_t ssid;
+};
+
+struct of_odin_probe_response : of_odin_header
+{
+	uint8_t version == 0x03;
+	uint8_t type == 4;
+	uint16_t length;
+	uint32_t xid;
+	uint32_t experimenter == 0x0D1171;
+	uint32_t subtype == 0x0f;
+	uint8_t odinproto_version == 1;
+	pad(3);
+	hw_addr_t client_hw_addr;
+	pad(2);
+	ssid_t bssid;
+	list(ssid_t) ssids;
+};
+
+struct statistic_tuple {
+	uint32_t statistic_id;
+	uint32_t statistic_val;
+};
+
+struct of_odin_publish : of_odin_header
+{
+	uint8_t version == 0x04;
+	uint8_t type == 4;
+	uint16_t length;
+	uint32_t xid;
+	uint32_t experimenter == 0x0D1171;
+	uint32_t subtype == 0x03;
+	uint8_t odinproto_version == 1;
+	pad(3);
+	uint32_t stats_cnt;
+	list(statistic_tuple_t) statistics; /* 'stats_cnt' * 2 many entries */
+};
+
+struct of_odin_read_lvaps : of_odin_header
+{
+	uint8_t version == 0x04;
+	uint8_t type == 4;
+	uint16_t length;
+	uint32_t xid;
+	uint32_t experimenter == 0x0D1171;
+	uint32_t subtype == 0x07;
+};
+
+struct of_odin_read_lvaps_response : of_odin_header
+{
+	uint8_t version == 0x04;
+	uint8_t type == 4;
+	uint16_t length;
+	uint32_t xid;
+	uint32_t experimenter == 0x0D1171;
+	uint32_t subtype == 0x10;
+	uint8_t odinproto_version == 1;
+	pad(3);
+	uint32_t lvap_cnt;
+	list(lvap_t) lvaps; /*'lvap_cnt' many LVAPs*/
+};
