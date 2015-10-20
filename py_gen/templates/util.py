@@ -201,3 +201,23 @@ def pack_checksum_128(value):
 def unpack_checksum_128(reader):
     hi, lo = reader.read("!QQ")
     return (hi << 64) | lo
+
+# ODIN types
+
+def pack_ssid(ssid):
+    if ssid is None:
+        return ""
+    ssid_len = len(ssid)
+    pack_str = "!" + (ssid_len * "B") + ((4 - (ssid_len % 4)) * "x") # padding
+    return struct.pack("!I%dB" % ssid_len, *map(ord, ssid))
+
+def unpack_ssid(reader):
+    ssid_len = reader.read("!L")[0]
+    pack_str = ("!%dB" % ssid_len) + ((4 - (ssid_len % 4)) * "x") # padding
+    return "".join(map(chr, reader.read(pack_str)))
+
+def pack_hw_addr(hw_addr):
+    return struct.pack("!6B", *map(lambda x: int(x, 16), hw_addr.split(":")))
+
+def unpack_hw_addr(reader):
+    return ":".join(map(lambda x: hex(x)[2:].rjust(2, "0"), reader.read("!6B")))

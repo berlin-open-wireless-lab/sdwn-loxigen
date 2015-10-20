@@ -121,6 +121,24 @@ type_data_map = {
         init='set()',
         pack='util.pack_bitmap_512(%s)',
         unpack="util.unpack_bitmap_512(%s)"),
+
+    # ODIN TYPES
+
+#    'statistic_tuple_t' : OFTypeData(
+#        init='(0,0)',
+#        pack='struct.pack("!LL", %s)',
+#        unpack='%s.read("!LL")'),
+    
+    'ssid_t' : OFTypeData(
+        init='None',
+        pack='util.pack_ssid(%s)',
+        unpack='util.unpack_ssid(%s)'),
+
+    'hw_addr_t' : OFTypeData(
+        init='None',
+        pack='util.pack_hw_addr(%s)',
+        unpack='util.unpack_hw_addr(%s)'),
+
 }
 
 ## Fixed length strings
