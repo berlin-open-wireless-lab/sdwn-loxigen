@@ -25,40 +25,47 @@
 // EPL for the specific language governing permissions and limitations
 // under the EPL.
 
-#version 4
-#version 5
+#version any
 
-// BSN extension instruction
-struct of_instruction_bsn : of_instruction_experimenter {
+// BSN extension message
+struct of_wifi_header : of_experimenter {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == ?;
+};
+
+// BSN extension action
+struct of_action_wifi : of_action_experimenter {
     uint16_t type == 65535;
     uint16_t len;
-    uint32_t experimenter == 0x5c16c7;
+    uint32_t experimenter == 0x421337;
     uint32_t subtype == ?;
     pad(4);
 };
 
-// BSN base error message
-struct of_bsn_base_error : of_experimenter_error_msg {
+struct of_wifi_stats_request : of_experimenter_stats_request {
     uint8_t version;
-    uint8_t type == 1;
+    uint8_t type == 18;
     uint16_t length;
     uint32_t xid;
-    uint16_t err_type == 0xffff;
-    uint16_t subtype == ?;
-    uint32_t experimenter == 0x5c16c7;
-    of_desc_str_t err_msg;
-    of_octets_t data;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_request_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == ?;
 };
 
-// BSN error message
-struct of_bsn_error : of_bsn_base_error {
+struct of_wifi_stats_reply : of_experimenter_stats_reply {
     uint8_t version;
-    uint8_t type == 1;
+    uint8_t type == 19;
     uint16_t length;
     uint32_t xid;
-    uint16_t err_type == 0xffff;
-    uint16_t subtype == 1;
-    uint32_t experimenter == 0x5c16c7;
-    of_desc_str_t err_msg;
-    of_octets_t data;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_reply_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == ?;
 };

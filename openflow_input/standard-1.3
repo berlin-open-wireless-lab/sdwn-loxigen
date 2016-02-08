@@ -1364,7 +1364,7 @@ struct of_experimenter_error_msg : of_error_msg {
     uint32_t xid;
     uint16_t err_type == 0xffff;
     uint16_t subtype;
-    uint32_t experimenter;
+    uint32_t experimenter == ?;
     of_octets_t data;
 };
 
@@ -2085,12 +2085,6 @@ struct of_async_get_request : of_header {
     uint8_t type == 26;
     uint16_t length;
     uint32_t xid;
-    uint32_t packet_in_mask_equal_master;
-    uint32_t packet_in_mask_slave;
-    uint32_t port_status_mask_equal_master;
-    uint32_t port_status_mask_slave;
-    uint32_t flow_removed_mask_equal_master;
-    uint32_t flow_removed_mask_slave;
 };
 
 struct of_async_get_reply : of_header {
