@@ -25,7 +25,7 @@
 // EPL for the specific language governing permissions and limitations
 // under the EPL.
 
-#version 1
+#version 4
 
 struct of_wifi_add_sta : of_wifi_header {
     uint8_t version;
@@ -36,4 +36,29 @@ struct of_wifi_add_sta : of_wifi_header {
     uint32_t subtype == 1;
     of_mac_addr_t sta;
     of_mac_addr_t ap;
+};
+
+struct of_wifi_get_stas_request : of_wifi_stats_request {
+    uint8_t version;
+    uint8_t type == 18;
+    uint16_t length;
+    uint32_t xid;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_request_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 1;
+};
+
+struct of_wifi_get_stas_reply : of_wifi_stats_reply {
+    uint8_t version;
+    uint8_t type == 19;
+    uint16_t length;
+    uint32_t xid;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_reply_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 1;
+    list(of_bsn_switch_pipeline_stats_entry_t) entries;
 };

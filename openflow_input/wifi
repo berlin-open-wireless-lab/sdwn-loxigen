@@ -25,7 +25,7 @@
 // EPL for the specific language governing permissions and limitations
 // under the EPL.
 
-#version any
+#version 4
 
 // BSN extension message
 struct of_wifi_header : of_experimenter {
