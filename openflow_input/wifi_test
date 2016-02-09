@@ -60,5 +60,9 @@ struct of_wifi_get_stas_reply : of_wifi_stats_reply {
     pad(4);
     uint32_t experimenter == 0x421337;
     uint32_t subtype == 1;
-    list(of_bsn_switch_pipeline_stats_entry_t) entries;
+    list(of_wifi_stas_entry_t) stas;
+};
+
+struct of_wifi_stas_entry {
+    of_mac_addr_t mac;
 };
