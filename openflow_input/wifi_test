@@ -45,6 +45,14 @@ struct of_wifi_packet_in : of_wifi_header {
     uint32_t xid;
     uint32_t experimenter == 0x421337;
     uint32_t subtype == 2;
+    uint8_t hdr_version_type;
+    uint8_t hdr_flags;
+    uint16_t hdr_duration;
+    of_mac_addr_t hdr_addr1;
+    of_mac_addr_t hdr_addr2;
+    of_mac_addr_t hdr_addr3;
+    uint16_t hdr_seq_ctrl;
+    of_mac_addr_t hdr_addr4;
     of_octets_t frame;
 };
 
