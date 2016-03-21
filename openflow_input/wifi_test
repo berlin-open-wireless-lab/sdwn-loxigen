@@ -88,6 +88,25 @@ struct of_wifi_del_vlap : of_wifi_header {
     of_mac_addr_t bssid;
 };
 
+struct of_wifi_get_remote_port_request : of_wifi_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 6;
+};
+
+struct of_wifi_get_remote_port_reply : of_wifi_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 7;
+    of_port_no_t port;
+};
+
 struct of_wifi_get_stas_request : of_wifi_stats_request {
     uint8_t version;
     uint8_t type == 18;
