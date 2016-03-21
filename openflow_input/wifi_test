@@ -38,6 +38,17 @@ struct of_wifi_add_sta : of_wifi_header {
     of_mac_addr_t ap;
 };
 
+struct of_wifi_del_sta : of_wifi_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 4;
+    of_mac_addr_t sta;
+    of_mac_addr_t ap;
+};
+
 struct of_wifi_packet_in : of_wifi_header {
     uint8_t version;
     uint8_t type == 4;
