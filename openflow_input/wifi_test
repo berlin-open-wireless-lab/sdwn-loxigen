@@ -78,6 +78,16 @@ struct of_wifi_add_vlap : of_wifi_header {
     of_octets_t beacon;
 };
 
+struct of_wifi_del_vlap : of_wifi_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 5;
+    of_mac_addr_t bssid;
+};
+
 struct of_wifi_get_stas_request : of_wifi_stats_request {
     uint8_t version;
     uint8_t type == 18;
