@@ -36,6 +36,7 @@ struct of_wifi_add_sta : of_wifi_header {
     uint32_t subtype == 1;
     of_mac_addr_t sta;
     of_mac_addr_t ap;
+    list(of_bsn_tlv_data_t) keys;
 };
 
 struct of_wifi_del_sta : of_wifi_header {
