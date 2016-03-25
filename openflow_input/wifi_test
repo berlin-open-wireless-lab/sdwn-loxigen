@@ -134,5 +134,7 @@ struct of_wifi_get_stas_reply : of_wifi_stats_reply {
 };
 
 struct of_wifi_stas_entry {
+    uint16_t length;
     of_mac_addr_t mac;
+    list(of_bsn_tlv_data_t) keys;
 };
