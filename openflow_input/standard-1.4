@@ -1347,7 +1347,7 @@ struct of_packet_out : of_header {
     uint32_t xid;
     uint32_t buffer_id;
     of_port_no_t in_port;
-    uint16_t actions_len;
+    uint16_t actions_len == length(actions);
     pad(6);
     list(of_action_t) actions;
     of_octets_t data;
@@ -2333,6 +2333,8 @@ struct of_queue_desc_stats_request : of_stats_request {
     uint16_t stats_type == 15;
     enum ofp_stats_request_flags flags;
     pad(4);
+    of_port_no_t port_no;
+    uint32_t queue_id;
 };
 
 struct of_queue_desc_prop {
