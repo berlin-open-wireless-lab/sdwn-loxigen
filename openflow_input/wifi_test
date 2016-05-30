@@ -36,6 +36,10 @@ struct of_wifi_add_sta : of_wifi_header {
     uint32_t subtype == 1;
     of_mac_addr_t sta;
     of_mac_addr_t ap;
+    uint16_t capabilities;
+    uint16_t aid;
+    of_desc_str_t supported_rates;
+    of_desc_str_t ht_capabilities;
     list(of_bsn_tlv_data_t) keys;
 };
 
@@ -137,5 +141,9 @@ struct of_wifi_get_stas_reply : of_wifi_stats_reply {
 struct of_wifi_stas_entry {
     uint16_t length;
     of_mac_addr_t mac;
+    uint16_t capabilities;
+    uint16_t aid;
+    of_desc_str_t supported_rates;
+    of_desc_str_t ht_capabilities;
     list(of_bsn_tlv_data_t) keys;
 };
