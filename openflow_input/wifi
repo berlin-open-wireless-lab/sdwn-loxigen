@@ -25,19 +25,17 @@
 // EPL for the specific language governing permissions and limitations
 // under the EPL.
 
-#version 4
+#version 4 // selects OpenFlow Version 1.3
 
-// BSN extension message
 struct of_wifi_header : of_experimenter {
     uint8_t version;
     uint8_t type == 4;
     uint16_t length;
     uint32_t xid;
-    uint32_t experimenter == 0x421337;
-    uint32_t subtype == ?;
+    uint32_t experimenter == 0x421337; //arbitaryliy chosen experimenter ID
+    uint32_t subtype == ?; //subtype filled in by subsequent message types
 };
 
-// BSN extension action
 struct of_action_wifi : of_action_experimenter {
     uint16_t type == 65535;
     uint16_t len;

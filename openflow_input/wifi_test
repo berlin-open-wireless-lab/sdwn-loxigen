@@ -27,6 +27,8 @@
 
 #version 4
 
+//This message is sent by the middle box when a new client has connected
+//or as a command to add a new sta on a vlap of a physical AP.
 struct of_wifi_add_sta : of_wifi_header {
     uint8_t version;
     uint8_t type == 4;
@@ -34,15 +36,17 @@ struct of_wifi_add_sta : of_wifi_header {
     uint32_t xid;
     uint32_t experimenter == 0x421337;
     uint32_t subtype == 1;
-    of_mac_addr_t sta;
-    of_mac_addr_t ap;
-    uint16_t capabilities;
-    uint16_t aid;
-    of_desc_str_t supported_rates;
-    of_desc_str_t ht_capabilities;
-    list(of_bsn_tlv_data_t) keys;
+    of_mac_addr_t sta; //MAC address of the client
+    of_mac_addr_t ap; //bssid of the access point
+    uint16_t capabilities; //"capabilities" field from IEEE 802.11
+    uint16_t aid; //association ID
+    of_desc_str_t supported_rates; //list of supported rates, as used in kernel
+    of_desc_str_t ht_capabilities; //vector of HT-capabilities, if any
+    list(of_bsn_tlv_data_t) keys; //cryptographic keys, is aplicable
 };
 
+//remove a sta from a vlap.
+//vlap and sta are identified by its mac addresses.
 struct of_wifi_del_sta : of_wifi_header {
     uint8_t version;
     uint8_t type == 4;
@@ -50,10 +54,12 @@ struct of_wifi_del_sta : of_wifi_header {
     uint32_t xid;
     uint32_t experimenter == 0x421337;
     uint32_t subtype == 4;
-    of_mac_addr_t sta;
-    of_mac_addr_t ap;
+    of_mac_addr_t sta; // client mac address
+    of_mac_addr_t ap; // access point mac address
 };
 
+//packet type used to transfer a wifi frame with radiotap header
+//to the controller. like of_packet_in
 struct of_wifi_packet_in : of_wifi_header {
     uint8_t version;
     uint8_t type == 4;
@@ -64,14 +70,17 @@ struct of_wifi_packet_in : of_wifi_header {
     uint8_t hdr_version_type;
     uint8_t hdr_flags;
     uint16_t hdr_duration;
-    of_mac_addr_t hdr_addr1;
-    of_mac_addr_t hdr_addr2;
-    of_mac_addr_t hdr_addr3;
-    uint16_t hdr_seq_ctrl;
-    of_mac_addr_t hdr_addr4;
-    of_octets_t frame;
+    of_mac_addr_t hdr_addr1; // address1 of the IEEE 802.11 frame format
+    of_mac_addr_t hdr_addr2; // address2 of the IEEE 802.11 frame format
+    of_mac_addr_t hdr_addr3; // address3 of the IEEE 802.11 frame format
+    uint16_t hdr_seq_ctrl;   // repitition of data from the header
+    of_mac_addr_t hdr_addr4; // address4 of the IEEE 802.11 frame format
+    of_octets_t frame; // the actual data
+                       // includes repitition of the previous fields
 };
 
+//instanciates a new vlap instance on a physical AP
+//TODO: needs more properties
 struct of_wifi_add_vlap : of_wifi_header {
     uint8_t version;
     uint8_t type == 4;
@@ -79,10 +88,11 @@ struct of_wifi_add_vlap : of_wifi_header {
     uint32_t xid;
     uint32_t experimenter == 0x421337;
     uint32_t subtype == 3;
-    of_mac_addr_t bssid;
-    of_octets_t beacon;
+    of_mac_addr_t bssid; // BSSID of the vlap to be created
+    of_octets_t beacon; //beacon frame associated with that vlap. not used.
 };
 
+//removed an exisitng vlap instance on a physical AP
 struct of_wifi_del_vlap : of_wifi_header {
     uint8_t version;
     uint8_t type == 4;
@@ -90,9 +100,11 @@ struct of_wifi_del_vlap : of_wifi_header {
     uint32_t xid;
     uint32_t experimenter == 0x421337;
     uint32_t subtype == 5;
-    of_mac_addr_t bssid;
+    of_mac_addr_t bssid; // BSSID of the vlap to be removed.
 };
 
+//ask for port at which this agent of connected
+//TODO: could probably be replaced with LLDP
 struct of_wifi_get_remote_port_request : of_wifi_header {
     uint8_t version;
     uint8_t type == 4;
@@ -102,6 +114,7 @@ struct of_wifi_get_remote_port_request : of_wifi_header {
     uint32_t subtype == 6;
 };
 
+//reply the port number where this agent is connected
 struct of_wifi_get_remote_port_reply : of_wifi_header {
     uint8_t version;
     uint8_t type == 4;
@@ -109,9 +122,11 @@ struct of_wifi_get_remote_port_reply : of_wifi_header {
     uint32_t xid;
     uint32_t experimenter == 0x421337;
     uint32_t subtype == 7;
-    of_port_no_t port;
+    of_port_no_t port; // the port number
 };
 
+//request a list of all connected sta to a given bssid
+//applies only to middle box
 struct of_wifi_get_stas_request : of_wifi_stats_request {
     uint8_t version;
     uint8_t type == 18;
@@ -125,6 +140,7 @@ struct of_wifi_get_stas_request : of_wifi_stats_request {
     of_mac_addr_t bssid;
 };
 
+//reply a list of connected sta (or empty list)
 struct of_wifi_get_stas_reply : of_wifi_stats_reply {
     uint8_t version;
     uint8_t type == 19;
@@ -138,10 +154,11 @@ struct of_wifi_get_stas_reply : of_wifi_stats_reply {
     list(of_wifi_stas_entry_t) stas;
 };
 
+//entry describing a single connected sta
 struct of_wifi_stas_entry {
     uint16_t length;
     of_mac_addr_t mac;
-    uint16_t capabilities;
+    uint16_t capabilities; //fields as in of_wifi_add_sta
     uint16_t aid;
     of_desc_str_t supported_rates;
     of_desc_str_t ht_capabilities;
