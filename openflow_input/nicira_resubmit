@@ -25,45 +25,14 @@
 // EPL for the specific language governing permissions and limitations
 // under the EPL.
 
-#version 4 // selects OpenFlow Version 1.3
+#version any
 
-struct of_wifi_header : of_experimenter {
-    uint8_t version;
-    uint8_t type == 4;
-    uint16_t length;
-    uint32_t xid;
-    uint32_t experimenter == 0x421337; //arbitaryliy chosen experimenter ID
-    uint32_t subtype == ?; //subtype filled in by subsequent message types
-};
-
-struct of_action_wifi : of_action_experimenter {
+struct of_action_nicira_resubmit : of_action_nicira {
     uint16_t type == 65535;
     uint16_t len;
-    uint32_t experimenter == 0x421337;
-    uint32_t subtype == ?;
-    pad(4);
-};
-
-struct of_wifi_stats_request : of_experimenter_stats_request {
-    uint8_t version;
-    uint8_t type == 18;
-    uint16_t length;
-    uint32_t xid;
-    uint16_t stats_type == 0xffff;
-    enum ofp_stats_request_flags flags;
-    pad(4);
-    uint32_t experimenter == 0x421337;
-    uint32_t subtype == ?;
-};
-
-struct of_wifi_stats_reply : of_experimenter_stats_reply {
-    uint8_t version;
-    uint8_t type == 19;
-    uint16_t length;
-    uint32_t xid;
-    uint16_t stats_type == 0xffff;
-    enum ofp_stats_reply_flags flags;
-    pad(4);
-    uint32_t experimenter == 0x421337;
-    uint32_t subtype == ?;
+    uint32_t experimenter == 0x2320;
+    uint16_t subtype == 1;
+    uint16_t in_port;
+    uint8_t  table;
+    pad(3);
 };

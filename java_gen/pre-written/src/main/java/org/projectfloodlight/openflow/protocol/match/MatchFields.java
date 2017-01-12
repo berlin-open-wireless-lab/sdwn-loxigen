@@ -75,5 +75,45 @@ public enum MatchFields {
     BSN_INNER_ETH_SRC,
     BSN_INNER_VLAN_VID,
     BSN_VFI,
-    BSN_IP_FRAGMENTATION
+    BSN_IP_FRAGMENTATION,
+
+    BSN_IN_PORTS_256,
+
+    /* Optical extensions */
+    CIRCUIT_OCH_SIGTYPE,
+    EXP_OCH_SIGTYPE,
+    EXP_OCH_SIGID,
+    CIRCUIT_OCH_SIGID,
+    EXP_ODU_SIGTYPE,
+    EXP_ODU_SIGID,
+    OCH_SIGATT,
+    OCH_SIGATT_BASIC,
+    CIRCUIT_OCH_SIGID_BASIC,
+    CIRCUIT_OCH_SIGTYPE_BASIC,
+
+    /* Nicira extensions */
+    NSP,
+    NSI,
+    NSH_C1,
+    NSH_C2,
+    NSH_C3,
+    NSH_C4,
+    NSH_MDTYPE,
+    NSH_NP,
+    ENCAP_ETH_SRC,
+    ENCAP_ETH_DST,
+    ENCAP_ETH_TYPE,
+    TUN_FLAGS,
+    TUN_GBP_ID,
+    TUN_GBP_FLAGS,
+    TUN_GPE_NP,
+    TUN_GPE_NP_MASKED,
+    TUN_GPE_FLAGS,
+    TUN_GPE_FLAGS_MASKED,
+
+    /* OFDPA extensions */
+    OFDPA_QOS_INDEX,
+    OFDPA_MPLS_TYPE,
+    OFDPA_MPLS_L2_PORT,
+    OFDPA_OVID
 }

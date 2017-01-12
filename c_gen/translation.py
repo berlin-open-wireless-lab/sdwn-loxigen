@@ -57,6 +57,7 @@ def loxi_name(ident):
         dict(OFPQ_MIN_RATE_UNCFG = "OF_QUEUE_MIN_RATE_UNCFG"),
         dict(OFPQ_MAX_RATE_UNCFG = "OF_QUEUE_MAX_RATE_UNCFG"),
         dict(OFP_NO_BUFFER = "OF_BUFFER_ID_NO_BUFFER"),
+        dict(APP_CODE_LEN = "OF_APP_CODE_LEN"),
 
 # These are for enums; they map the prefixes
         dict(OFPP_MAX = "OF_PORT_NUMBER_MAX"), # Special case

@@ -26,7 +26,9 @@ ofp_constants = dict(
     OF_ETH_ALEN = 6,
     OF_DESC_STR_LEN   = 256,
     OF_SERIAL_NUM_LEN = 32,
-    OF_CONTROLLER_URI_LEN = 32
+    OF_CONTROLLER_URI_LEN = 32,
+    OF_APP_CODE_LEN = 15,
+    OF_IEEE80211_MCS_RX_MASK_LEN = 10
 )
 
 
@@ -104,7 +106,7 @@ of_mixed_types = dict(
         }
 )
 
-## basic lengths
+## basic lengths and 'fixed length' flag
 of_base_lengths = dict(
     char     = (1, True),
     uint8_t  = (1, True),
@@ -119,6 +121,8 @@ of_base_lengths = dict(
     of_desc_str_t = (ofp_constants["OF_DESC_STR_LEN"], True),
     of_serial_num_t = (ofp_constants["OF_SERIAL_NUM_LEN"], True),
     of_controller_uri_t = (ofp_constants["OF_CONTROLLER_URI_LEN"], True),
+    of_str6_t = (6, True),
+    of_str32_t = (32, True),
     of_str64_t = (64, True),
     of_match_v1_t = (40, True),
     of_match_v2_t = (88, True),
@@ -127,8 +131,19 @@ of_base_lengths = dict(
     of_octets_t = (0, False),
     of_bitmap_128_t = (16, True),
     of_checksum_128_t = (16, True),
+    of_bitmap_256_t = (32, True),
     of_bitmap_512_t = (64, True),
-    of_time_t = (16, True)
+    of_time_t = (16, True),
+    # Optical extension
+    of_calient_flow_stats_entry_t = (64, False), # trailing of_match_t and instructions list have variable length
+    of_app_code_t = (ofp_constants["OF_APP_CODE_LEN"], True),
+    of_circuit_sig_id_t = (6, True),
+    of_och_sig_id_t = (6, True),
+    of_odu_sig_id_t = (4, False), # 2 bytes for tpn and tsmap length respectively, tsmap has variable length
+    # SDWN extension
+    of_ieee80211_mcs_rx_mask_t = (10, True),
+    #of_ieee80211_mcs_info_t = (16, True),
+    #of_ieee80211_vht_mcs_info_t = (8, True)
 )
 
 def type_dec_to_count_base(m_type):

@@ -797,6 +797,191 @@ _wbuf_octets_get(of_wire_buffer_t *wbuf, int offset, uint8_t *dst, int bytes) {
     _wbuf_octets_set(buf, offset, (uint8_t *)sernum, OF_SERIAL_NUM_LEN)
 
 /**
+ * Get an application code string from a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param s The string
+ *
+ * Uses the octets function.
+ */
+
+#define of_wire_buffer_app_code_get(buf, offset, s) \
+    _wbuf_octets_get(buf, offset, (uint8_t *) s, OF_APP_CODE_LEN)
+
+/**
+ * Set an application code string in a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param s Where to store the application code
+ *
+ * Uses the octets function.
+ */
+
+#define of_wire_buffer_app_code_set(buf, offset, s) \
+    _wbuf_octets_set(buf, offset, (uint8_t *) s, OF_APP_CODE_LEN)
+
+/**
+ * Get a circuit signal ID string from a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param s The string
+ *
+ * Uses the octets function.
+ */
+
+#define of_wire_buffer_circuit_sig_id_get(buf, offset, s) \
+    _wbuf_octets_get(buf, offset, (uint8_t *) &s, 6)
+
+/**
+ * Set a circuit signal ID string in a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param s Where to store the signal ID
+ *
+ * Uses the octets function.
+ */
+
+#define of_wire_buffer_circuit_sig_id_set(buf, offset, s) \
+    _wbuf_octets_set(buf, offset, (uint8_t *) &s, 6)
+
+/**
+ * Get an OCH signal ID string from a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param s The string
+ *
+ * Uses the octets function.
+ */
+
+#define of_wire_buffer_och_sig_id_get(buf, offset, s) \
+    _wbuf_octets_get(buf, offset, (uint8_t *) &s, 6)
+
+/**
+ * Set an OCH signal ID string in a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param s Where to store the signal ID
+ *
+ * Uses the octets function.
+ */
+
+#define of_wire_buffer_och_sig_id_set(buf, offset, s) \
+    _wbuf_octets_set(buf, offset, (uint8_t *) &s, 6)
+
+/**
+ * Get an ODU signal ID from a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param odu_sig_id Pointer to where to put value
+ *
+ * The underlying buffer accessor funtions handle endian and alignment.
+ */
+
+static inline void
+of_wire_buffer_odu_sig_id_get(of_wire_buffer_t *wbuf, int offset, of_odu_sig_id_t *odu_sig_id)
+{
+    // check access up until tsmap (exclusive)
+    OF_WIRE_BUFFER_ACCESS_CHECK(wbuf, offset + ((int)(2 * sizeof(uint16_t))));
+    // get tpn and tsmap length from buffer
+    of_wire_buffer_u16_get(wbuf, offset, &odu_sig_id->tpn);
+    of_wire_buffer_u16_get(wbuf, offset + 1, &odu_sig_id->length);
+    // check access for length of tsmap
+    OF_WIRE_BUFFER_ACCESS_CHECK(wbuf, offset + ((int)(2 * sizeof(uint16_t))) + (int) odu_sig_id->length);
+    // get tsmap
+    if (odu_sig_id->length > 0)
+        odu_sig_id->tsmap = OF_WIRE_BUFFER_INDEX(wbuf, offset + 4);
+    else
+        odu_sig_id->tsmap = NULL;
+}
+
+/**
+ * Set an ODU signal ID in a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param odu_signal_id The ID to store
+ *
+ * The underlying buffer accessor funtions handle endian and alignment.
+ */
+
+static inline void
+of_wire_buffer_odu_sig_id_set(of_wire_buffer_t *wbuf, int offset, of_odu_sig_id_t odu_sig_id)
+{
+    OF_WIRE_BUFFER_ACCESS_CHECK(wbuf, offset + ((int)(2 * sizeof(uint16_t))) + (int) odu_sig_id.length);
+    of_wire_buffer_u16_set(wbuf, offset, odu_sig_id.tpn);
+    of_wire_buffer_u16_set(wbuf, offset + (int) sizeof(uint16_t), odu_sig_id.length);
+    _wbuf_octets_set(wbuf, offset  + (int)(2 * sizeof(uint16_t)), (uint8_t*) odu_sig_id.tsmap, odu_sig_id.length);
+}
+
+/**
+ * Get an MCS RX mask from a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param mask The RX mask
+ *
+ * Uses the octets function.
+ */
+#define of_wire_buffer_mcs_rx_mask_get(wbuf, offset, mask)\
+ _wbuf_octets_get(wbuf, offset, (uint8_t*) mask, sizeof(of_ieee80211_mcs_rx_mask_t))
+
+/**
+ * Set an MCS RX mask in a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param s Where to store the RX MASK
+ *
+ * Uses the octets function.
+ */
+#define of_wire_buffer_mcs_rx_mask_set(wbuf, offset, mask)\
+ _wbuf_octets_set(wbuf, offset, (uint8_t*) &mask, sizeof(of_ieee80211_mcs_rx_mask_t))
+
+/**
+ * Get a str6 string from a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param s The string
+ *
+ * Uses the octets function.
+ */
+#define of_wire_buffer_str6_get(buf, offset, s) \
+    _wbuf_octets_get(buf, offset, (uint8_t *)s, 6)
+
+/**
+ * Set a str6 string in a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param s Where to store the str6
+ *
+ * Uses the octets function.
+ */
+#define of_wire_buffer_str6_set(buf, offset, s) \
+    _wbuf_octets_set(buf, offset, (uint8_t *)s, 6)
+
+/**
+ * Get a str6 string from a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param s The string
+ *
+ * Uses the octets function.
+ */
+
+#define of_wire_buffer_str32_get(buf, offset, s) \
+    _wbuf_octets_get(buf, offset, (uint8_t *)s, 32)
+
+/**
+ * Set a str32 string in a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param s Where to store the str32
+ *
+ * Uses the octets function.
+ */
+
+#define of_wire_buffer_str32_set(buf, offset, s) \
+    _wbuf_octets_set(buf, offset, (uint8_t *)s, 32)
+
+
+/**
  * Get a str64 string from a wire buffer
  * @param wbuf The pointer to the wire buffer structure
  * @param offset Offset in the wire buffer
@@ -888,6 +1073,43 @@ _wbuf_octets_get(of_wire_buffer_t *wbuf, int offset, uint8_t *dst, int bytes) {
 #define of_wire_buffer_checksum_128_set(buf, offset, checksum) \
     (of_wire_buffer_u64_set(buf, offset, checksum.hi), of_wire_buffer_u64_set(buf, offset+8, checksum.lo))
 
+/**
+ * Get an bitmap_256 from a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param addr Pointer to where to store the bitmap_256
+ *
+ * The underlying buffer accessor funtions handle endianness and alignment.
+ */
+
+static inline void
+of_wire_buffer_bitmap_256_get(of_wire_buffer_t *wbuf, int offset, of_bitmap_256_t *value)
+{
+    OF_WIRE_BUFFER_ACCESS_CHECK(wbuf, offset + (int) sizeof(of_bitmap_256_t));
+    int i;
+    for (i = 0; i < 4; i++) {
+        buf_u64_get(OF_WIRE_BUFFER_INDEX(wbuf, offset+i*8), &value->words[i]);
+    }
+}
+
+/**
+ * Set an bitmap_256 in a wire buffer
+ * @param wbuf The pointer to the wire buffer structure
+ * @param offset Offset in the wire buffer
+ * @param addr The variable holding bitmap_256 to store
+ *
+ * The underlying buffer accessor funtions handle endian and alignment.
+ */
+
+static inline void
+of_wire_buffer_bitmap_256_set(of_wire_buffer_t *wbuf, int offset, of_bitmap_256_t value)
+{
+    OF_WIRE_BUFFER_ACCESS_CHECK(wbuf, offset + (int) sizeof(of_bitmap_256_t));
+    int i;
+    for (i = 0; i < 4; i++) {
+        buf_u64_set(OF_WIRE_BUFFER_INDEX(wbuf, offset+i*8), value.words[i]);
+    }
+}
 
 /**
  * Get a bitmap_512 from a wire buffer
@@ -895,7 +1117,7 @@ _wbuf_octets_get(of_wire_buffer_t *wbuf, int offset, uint8_t *dst, int bytes) {
  * @param offset Offset in the wire buffer
  * @param value Pointer to where to put value
  *
- * The underlying buffer accessor funtions handle endian and alignment.
+ * The underlying buffer accessor funtions handle endianness and alignment.
  */
 
 static inline void

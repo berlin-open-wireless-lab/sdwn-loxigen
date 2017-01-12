@@ -1,0 +1,517 @@
+#version 4
+
+/* 
+ * Software Defined Wireless Networking extensions to the OpenFlow protocol.
+ * Much like the optical extensions, we use Multipart messages
+ * to exchange information about wireless NICs and the networks
+ * they manage.
+ */
+
+ /* SDWN message subtypes
+  *  1 - Add client
+  *  2 - Packet in
+  *  3 - Add LVAP
+  *  4 - Delete client
+  *  5 - Delete LVAP
+  *  6 - Get remote port request (???)
+  *  7 - Get remote port reply (???)
+  *  8 - Modify LVAP
+  *  9 - MGMT Frame
+  * 10 - MGMT Reply
+  * 13 - Set Channel
+  */
+
+ /* SDWN Multipart message subtypes
+  *  1 - Get Port Desc Reply
+  *  2 - Get clients Request/Reply (LVAP client)
+  *  3 - Get clients Reply (Normal client)
+  *  4 - Get clients Reply (Normal client with crypto params)
+  *  5 - Get Channel Request/Reply
+  */
+
+/* SDWN extension experimenter header */
+ struct of_sdwn_header : of_experimenter {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == ?;
+};
+
+/* SDWN extension request header */
+struct of_sdwn_request : of_experimenter_stats_request {
+    uint8_t version;
+    uint8_t type == 18;
+    uint16_t length;
+    uint32_t xid;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_request_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == ?;
+};
+
+/* SDNW extension reply header */
+struct of_sdwn_reply : of_experimenter_stats_reply {
+    uint8_t version;
+    uint8_t type == 19;
+    uint16_t length;
+    uint32_t xid;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_reply_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == ?;
+};
+
+/* Multipart message to request port descriptions from the wireless switch
+ */
+struct of_sdwn_port_desc_request : of_sdwn_request {
+    uint8_t version;
+    uint8_t type == 18;
+    uint16_t length;
+    uint32_t xid;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_request_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 1;
+};
+
+/* Multipart message to reply to a port description request */
+struct of_sdwn_port_desc_reply : of_sdwn_reply {
+    uint8_t version;
+    uint8_t type == 19;
+    uint16_t length;
+    uint32_t xid;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_reply_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 1;
+    list(of_sdwn_entity_t) entities;
+};
+
+enum ofp_sdwn_entity_type(wire_type=uint16_t) {
+    OFP_SDWNENTITY_NIC = 0,
+    OFP_SDWNENTITY_ACCESSPOINT = 1,
+    OFP_SDWNENTITY_BAND = 3,
+    OFP_SDWNENTITY_FREQ = 4,
+    OFP_SDWNENTITY_RATE = 5,
+    OFP_SDWNENTITY_RELATED_SWITCH = 6,
+};
+
+struct of_sdwn_entity {
+    // enum ofp_sdwn_entity_type type == ?;
+    uint16_t type == ?;
+    uint16_t length;
+};
+
+/* Message announcing the present of another virtual OpenFlow switch
+ * on the same physical switch.
+ */
+struct of_sdwn_entity_related_switch : of_sdwn_entity {
+    uint16_t type == 6;
+    uint16_t length;
+    uint64_t datapath_id;
+};
+
+/* IEEE802.11 HT and VHT capabilities as reported by nl80211 */
+struct of_ieee80211_mcs_info {
+    of_ieee80211_mcs_rx_mask_t rx_mask;
+    uint16_t rx_highest;
+    uint8_t tx_params;
+    pad(3);
+};
+
+struct of_ieee80211_ht_cap {
+    uint16_t cap_info;
+    uint8_t ampdu_params_info;
+    of_ieee80211_mcs_info_t mcs;
+    uint16_t extended_ht_cap_info;
+    uint32_t tx_BF_cap_info;
+    uint8_t antenna_selection_info;
+};
+
+struct of_ieee80211_vht_mcs_info {
+    uint16_t rx_vht_mcs;
+    uint16_t rx_highest;
+    uint16_t tx_vht_mcs;
+    uint16_t tx_highest;
+};
+
+struct of_ieee80211_vht_cap {
+    uint32_t cap_info;
+    of_ieee80211_vht_mcs_info_t mcs;
+};
+
+enum ofp_ieee80211_capability_flags(wire_type=uint16_t,bitmask=True) {
+    IEEE80211_CAPABILITY_FLAG_HT_CAP = 0x0001,
+    IEEE80211_CAPABILITY_FLAG_VHT_CAP = 0x0002,
+};
+
+struct of_sdwn_entity_rate : of_sdwn_entity {
+    uint16_t type == 5;
+    uint16_t length;
+    uint32_t index;     // device index of phy supporting this rate
+    uint16_t band_no;
+    pad(2);
+    uint32_t rate;
+};
+
+struct of_sdwn_entity_freq : of_sdwn_entity {
+    uint16_t type == 4;
+    uint16_t length;
+    uint32_t index;     // device index of phy supporting this frequency
+    uint16_t band_no;
+    pad(2);
+    uint32_t freq;
+    uint32_t max_tx_power;
+};
+
+struct of_sdwn_entity_band : of_sdwn_entity {
+    uint16_t type == 3;
+    uint16_t length;
+    uint32_t index;     // device index of phy supporting this frequency
+    uint16_t band_no;   // index for per-nic bands to allow mapping of freqs and rates
+    enum ofp_ieee80211_capability_flags cap_flags;  // flags indicating the presence of HT/VHT caps
+    of_ieee80211_ht_cap_t ht_capabilities;
+    of_ieee80211_vht_cap_t vht_capabilities;
+};
+
+/* Wireless NIC description  */
+struct of_sdwn_entity_nic : of_sdwn_entity {
+    // enum ofp_sdwn_entity_type type == OFP_SDWNENTITY_NIC;
+    uint16_t type == 0;
+    uint16_t length;
+    uint32_t index;                                 // device index on the switch
+    of_mac_addr_t mac_addr;                         // hardware address
+};
+
+enum ofp_sdwn_accesspoint_config(wire_type=uint16_t, bitmask=True) {
+    OFP_AP_ENABLED = 0x0001,
+};
+
+struct of_sdwn_entity_accesspoint : of_sdwn_entity {
+    // enum ofp_sdwn_entity_type type == OFP_SDWNENTITY_ACCESSPOINT;
+    uint16_t type == 1;
+    uint16_t length;
+    of_port_no_t if_no;            // interface number
+    of_port_name_t name;        // interface name
+    uint16_t config;
+    of_mac_addr_t bssid;
+    of_mac_addr_t phy_mac;
+    pad(2);
+    uint32_t curr_freq;         // operating frequency of AP
+    uint32_t curr_speed;        // unused at the moment
+    uint32_t max_speed;         // unused at the moment
+    of_octets_t ssid;           // 0-32 bytes
+};
+
+/* This message's meaning depends on its sender.
+ * If it is sent by the controller to the agent, it is
+ * an instruction to create a new client.
+ * If it is sent by the agent to the controller, it is
+ * a notification that a new client has connected.
+ */
+struct of_sdwn_add_client : of_sdwn_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 1;
+    of_mac_addr_t client;               // client's MAC address
+    pad(2);
+    of_port_no_t ap;                    // AP's port number
+    uint16_t assoc_id;                  // ignored when sent as a command (???)
+    uint16_t capabilities;
+    enum ofp_ieee80211_capability_flags cap_flags;
+    of_ieee80211_ht_cap_t ht_capabilities;
+    of_ieee80211_vht_cap_t vht_capabilities;
+    of_desc_str_t supported_rates;      // supported rates as used in kernel
+    list(of_bsn_tlv_data_t) keys;       // cryptographic keys, is applicable
+};
+
+/* Remove a client from an LVAP.
+ * LVAP and client are identified by their MAC addresses. */
+struct of_sdwn_del_client : of_sdwn_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 4;
+    of_mac_addr_t client;   // client's MAC address
+    of_port_no_t ap;        // AP's interface number
+    uint16_t reason;        // reason code from 802.11
+    uint8_t deauth;         // boolean
+    pad(1);
+    uint32_t ban_time;
+};
+
+/* Creates a new LVAP instance on an AP 
+ * TODO: needs more properties */
+struct of_sdwn_add_lvap : of_sdwn_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 3;
+    of_mac_addr_t bssid;    // BSSID of the LVAP to be created
+    of_mac_addr_t phy_mac;
+    enum ofp_ieee80211_capability_flags cap_flags;
+    of_ieee80211_ht_cap_t ht_capabilities;
+    of_ieee80211_vht_cap_t vht_capabilities;
+    of_octets_t beacon;
+};
+
+/* Remove an LVAP from an AP */
+struct of_sdwn_del_lvap : of_sdwn_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 5;
+    of_mac_addr_t bssid; // BSSID of the LVAP to be removed.
+};
+
+/* Activate or deactivate an LVAP */
+struct of_sdwn_mod_lvap : of_sdwn_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 8;
+    of_mac_addr_t bssid;
+    pad(2);
+    uint16_t config;
+    uint16_t mask;
+};
+
+/* Query the switch for the channel used by the AP 
+ * identified by the given interface index */
+struct of_sdwn_get_channel_request : of_sdwn_request {
+    uint8_t version;
+    uint8_t type == 18;
+    uint16_t length;
+    uint32_t xid;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_request_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 5;
+    of_port_no_t if_no;
+};
+
+/* Multipart message to reply to a port description request */
+struct of_sdwn_get_channel_reply : of_sdwn_reply {
+    uint8_t version;
+    uint8_t type == 19;
+    uint16_t length;
+    uint32_t xid;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_reply_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 5;
+    uint32_t channel;
+};
+
+/* Instruct the AP to switch to given channel after given
+ * number of beacons have been sent */
+struct of_sdwn_set_channel : of_sdwn_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 13;
+    of_port_no_t if_no;
+    uint32_t frequency;
+    uint32_t beacon_count;
+};
+
+/* Packet type used to transfer an 802.11 frame with radiotap header
+ * to the controller. */
+struct of_sdwn_packet_in : of_sdwn_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 2;
+    of_port_no_t if_no;
+    uint8_t hdr_version_type;
+    uint8_t hdr_flags;
+    uint16_t hdr_duration;
+    of_mac_addr_t hdr_addr1;    // address1 of the IEEE 802.11 frame format
+    of_mac_addr_t hdr_addr2;    // address2 of the IEEE 802.11 frame format
+    of_mac_addr_t hdr_addr3;    // address3 of the IEEE 802.11 frame format
+    uint16_t hdr_seq_ctrl;      // repitition of data from the header
+    of_mac_addr_t hdr_addr4;    // address4 of the IEEE 802.11 frame format
+    of_octets_t frame;          // the actual data
+                                // includes repitition of the previous fields
+};
+
+/* Ask for port to which this agent is connected
+ * TODO: could probably be replaced with LLDP */
+struct of_sdwn_get_remote_port_request : of_sdwn_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 6;
+};
+
+/* Reply with the number of the port to which this agent is connected */
+struct of_sdwn_get_remote_port_reply : of_sdwn_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 7;
+    of_port_no_t if_no;
+};
+
+/* Request a list of all clients connected to a given AP. */
+struct of_sdwn_get_clients_request : of_sdwn_request {
+    uint8_t version;
+    uint8_t type == 18;
+    uint16_t length;
+    uint32_t xid;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_request_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 2;
+    of_port_no_t if_no;
+};
+
+/* IEEE 802.11 management frames */
+enum ofp_ieee80211_mgmt_frame(wire_type=uint8_t) {
+    IEEE80211_MGMT = 0x00, // generic management frame
+    IEEE80211_PROBE = 0x01,
+    IEEE80211_ASSOC = 0x02,
+    IEEE80211_AUTH = 0x03,
+};
+
+/* sent by the switch to the controller when a management frame
+ * is overheard */
+struct of_sdwn_ieee80211_mgmt : of_sdwn_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 9;
+    enum ofp_ieee80211_mgmt_frame ieee80211_type;
+    of_mac_addr_t addr;
+    of_mac_addr_t target;
+    uint32_t ssi;
+    uint32_t freq;
+    of_port_no_t if_no;
+};
+
+struct of_sdwn_ieee80211_mgmt_reply : of_sdwn_header {
+    uint8_t version;
+    uint8_t type == 4;
+    uint16_t length;
+    uint32_t xid;
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 10;
+    of_port_no_t if_no;
+    pad(3);
+    uint8_t deny; // boolean
+};
+
+enum ofp_sdwn_get_clients_reply_type(wire_type=uint8_t) {
+    OFP_SDWN_GET_CLIENTS_REPLY_TYPE_LVAP = 0,
+    OFP_SDWN_GET_CLIENTS_REPLY_TYPE_NORMAL = 1,
+    OFP_SDWN_GET_CLIENTS_REPLY_TYPE_CRYPTO = 2,
+};
+
+struct of_sdwn_get_clients_reply : of_sdwn_reply {
+    uint8_t version;
+    uint8_t type == 19;
+    uint16_t length;
+    uint32_t xid;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_reply_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 2;
+    uint8_t client_type == ?;
+    pad(3);
+};
+
+/* Reply for one connected client. Multipart flags used to link more than one message. */
+struct of_sdwn_get_clients_reply_lvap : of_sdwn_get_clients_reply {
+    uint8_t version;
+    uint8_t type == 19;
+    uint16_t length;
+    uint32_t xid;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_reply_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 2;
+    uint8_t client_type == 0;
+    pad(3);
+    // client description
+    of_mac_addr_t mac;      // client MAC
+};
+
+/* Reply for one connected client. Multipart flags used to link more than one message. */
+struct of_sdwn_get_clients_reply_normal : of_sdwn_get_clients_reply {
+    uint8_t version;
+    uint8_t type == 19;
+    uint16_t length;
+    uint32_t xid;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_reply_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 2;
+    uint8_t client_type == 1;
+    pad(3);
+    // client description
+    of_mac_addr_t mac;      // client MAC
+    uint16_t assoc_id;
+    uint16_t capabilities;
+    enum ofp_ieee80211_capability_flags cap_flags;
+    of_ieee80211_ht_cap_t ht_capabilities;
+    of_ieee80211_vht_cap_t vht_capabilities;
+    of_desc_str_t supported_rates;
+};
+
+/* Reply for one connected client. Multipart flags used to link more than one message. */
+struct of_sdwn_get_clients_reply_crypto : of_sdwn_get_clients_reply {
+    uint8_t version;
+    uint8_t type == 19;
+    uint16_t length;
+    uint32_t xid;
+    uint16_t stats_type == 0xffff;
+    enum ofp_stats_reply_flags flags;
+    pad(4);
+    uint32_t experimenter == 0x421337;
+    uint32_t subtype == 2;
+    uint8_t client_type == 2;
+    pad(3);
+    // client description
+    of_mac_addr_t mac;      // client MAC
+    uint16_t assoc_id;
+    uint16_t capabilities;
+    enum ofp_ieee80211_capability_flags cap_flags;
+    of_ieee80211_ht_cap_t ht_capabilities;
+    of_ieee80211_vht_cap_t vht_capabilities;
+    of_desc_str_t supported_rates;
+    list(of_bsn_tlv_data_t) keys;
+};
+

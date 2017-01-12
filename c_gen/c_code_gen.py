@@ -289,7 +289,7 @@ def identifiers_gen(out, filename):
     OF_VALUE_BY_VERSION(version, %(val_str)s)
 """ % dict(ident=ident, val_str=", ".join(val_list)))
             if flags.ident_is_flag(ident):
-                log("Treating %s as a flag" % ident)
+                # log("Treating %s as a flag" % ident)
                 out.write("""
 #define %(ident)s_SET(flags, version)     \\
     OF_FLAG_SET(flags, %(ident)s_BY_VERSION(version))
@@ -616,9 +616,49 @@ typedef struct of_ipv6_s {
    uint8_t addr[OF_IPV6_BYTES];
 } of_ipv6_t;
 
+/* Optical extension */
+typedef struct of_odu_sig_id_s {
+    uint16_t tpn;
+    uint16_t length;
+    uint8_t *tsmap;
+} of_odu_sig_id_t;
+
+typedef struct of_circuit_sig_id_s {
+    uint8_t grid_type;
+    uint8_t channel_spacing;
+    uint16_t channel_number;
+    uint16_t spectral_width;
+} of_circuit_sig_id_t;
+
+typedef struct of_och_sig_id_s {
+    uint8_t grid_type;
+    //enum ofp_channel_spacing channel_spacing;
+    uint8_t channel_spacing;
+    uint16_t n;
+    uint16_t m;
+} of_och_sig_id_t;
+
+typedef struct of_bitmap_128_s {
+    uint64_t hi;
+    uint64_t lo;
+} of_bitmap_128_t;
+
+typedef struct of_checksum_128_s {
+    uint64_t hi;
+    uint64_t lo;
+} of_checksum_128_t;
+
+typedef struct of_bitmap_256_s {
+    uint64_t words[4];
+} of_bitmap_256_t;
+
 typedef struct of_bitmap_512_s {
     uint64_t words[8];
 } of_bitmap_512_t;
+
+typedef struct of_ieee80211_mcs_rx_mask_s {
+    uint8_t bytes[10];
+} of_ieee80211_mcs_rx_mask_t;
 
 extern const of_mac_addr_t of_mac_addr_all_ones;
 extern const of_mac_addr_t of_mac_addr_all_zeros;
@@ -626,6 +666,8 @@ extern const of_mac_addr_t of_mac_addr_all_zeros;
 extern const of_ipv6_t of_ipv6_all_ones;
 extern const of_ipv6_t of_ipv6_all_zeros;
 
+extern const of_bitmap_256_t of_bitmap_256_all_ones;
+extern const of_bitmap_256_t of_bitmap_256_all_zeroes;
 extern const of_bitmap_512_t of_bitmap_512_all_ones;
 extern const of_bitmap_512_t of_bitmap_512_all_zeroes;
 
@@ -659,20 +701,13 @@ typedef struct of_octets_s {
 
 /* Currently these are categorized as scalars */
 typedef char of_port_name_t[OF_MAX_PORT_NAME_LEN];
+typedef char of_app_code_t[OF_APP_CODE_LEN];
 typedef char of_table_name_t[OF_MAX_TABLE_NAME_LEN];
 typedef char of_desc_str_t[OF_DESC_STR_LEN];
 typedef char of_serial_num_t[OF_SERIAL_NUM_LEN];
+typedef char of_str6_t[6];
+typedef char of_str32_t[32];
 typedef char of_str64_t[64];
-
-typedef struct of_bitmap_128_s {
-    uint64_t hi;
-    uint64_t lo;
-} of_bitmap_128_t;
-
-typedef struct of_checksum_128_s {
-    uint64_t hi;
-    uint64_t lo;
-} of_checksum_128_t;
 
 /* These are types which change across versions.  */
 typedef uint32_t of_port_no_t;
@@ -1147,10 +1182,17 @@ def gen_accessor_offsets(out, cls, m_name, version, a_type, m_type, offset):
             pass
         elif (cls == "of_bsn_gentable_entry_stats_entry" and m_name == "stats"):
             pass
+        # added when merging ONOS fork with SDWN loxigen
+        elif (cls == "of_calient_flow_stats_entry" and m_name == "instructions"):
+            pass
+        # ODU signal ID types have variable length
+        elif (cls == "of_oxm_exp_odu_sigid_masked" and m_name == "value_mask"):
+            pass
         else:
             debug("Error: Unknown member with offset == -1")
             debug("  cls %s, m_name %s, version %d" % (cls, m_name, version))
             sys.exit(1)
+
         o_str = "_%s_%s_OFFSET(obj)" % (cls.upper()[3:], m_name.upper())
 
     out.write("""\

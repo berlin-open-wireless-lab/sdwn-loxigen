@@ -299,4 +299,26 @@ wire_match_len(of_object_t *obj, int match_offset) {
     (of_object_u16_get(obj, 2) + \
         of_object_fixed_len[(obj)->version][OF_BSN_GENTABLE_ENTRY_STATS_ENTRY])
 
+/* Optical Extensions */
+
+/**
+ * Macro to calculate offset of instructions member in of_calient_flow_stats_entry
+ * @param obj An object of type of_calient_flow_stats_entry_t
+ */
+
+#define _CALIENT_FLOW_STATS_ENTRY_INSTRUCTIONS_OFFSET(obj) \
+    (of_object_fixed_len[(obj)->version][OF_CALIENT_FLOW_STATS_ENTRY] + \
+        sizeof(of_match_t))
+
+/**
+ * Macro to calculate offset of value mask_member in of_oxm_exp_odu_sigid_masked.
+ * Offset is base length + tpn of member 'value' + tsmap length of member 'value' +
+ * tsmap of member 'value'.
+ * @param obj An object of type of_oxm_exp_odu_sigid_maksked_t
+ */
+
+#define _OXM_EXP_ODU_SIGID_MASKED_VALUE_MASK_OFFSET(obj) \
+    (of_object_u16_get(obj, 10) + 4 + \
+        of_object_fixed_len[(obj)->version][OF_OXM_EXP_ODU_SIGID_MASKED])
+
 #endif /* __LOCI_INT_H__ */

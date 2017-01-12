@@ -372,6 +372,8 @@ port_name = gen_fixed_length_string_jtype(16)
 desc_str = gen_fixed_length_string_jtype(256)
 serial_num = gen_fixed_length_string_jtype(32)
 table_name = gen_fixed_length_string_jtype(32)
+str6 = gen_fixed_length_string_jtype(6)
+str32 = gen_fixed_length_string_jtype(32)
 str64 = gen_fixed_length_string_jtype(64)
 ipv4 = JType("IPv4Address") \
         .op(read="IPv4Address.read4Bytes(bb)", \
@@ -481,6 +483,10 @@ port_bitmap_128 = JType('OFBitMask128') \
             .op(read='OFBitMask128.read16Bytes(bb)',
                 write='$name.write16Bytes(bb)',
                 default='OFBitMask128.NONE')
+port_bitmap_256 = JType('OFBitMask256') \
+            .op(read='OFBitMask256.read32Bytes(bb)',
+                write='$name.write32Bytes(bb)',
+                default='OFBitMask256.NONE')
 port_bitmap_512 = JType('OFBitMask512') \
             .op(read='OFBitMask512.read64Bytes(bb)',
                 write='$name.write64Bytes(bb)',
@@ -577,6 +583,49 @@ controller_status_entry = JType('OFControllerStatusEntry') \
         .op(read='OFControllerStatusEntryVer$version.READER.readFrom(bb)', \
             write='$name.writeTo(bb)')
 
+# Optical extensions
+odu_sig_id = JType("OduSignalID") \
+        .op(read="OduSignalID.readFromBuffer(bb)", \
+            write="$name.writeToBuffer(bb)")
+
+sig_id = JType("CircuitSignalID") \
+        .op(version=ANY, read="CircuitSignalID.read6Bytes(bb)", \
+            write="$name.write6Bytes(bb)", \
+            default="CircuitSignalID.NONE")
+
+calient_port_desc_stats_entry = JType('OFCalientPortDescStatsEntry') \
+        .op(read='OFCalientPortDescStatsEntryVer$version.READER.readFrom(bb)',\
+            write='$name.writeTo(bb)')
+
+
+app_code = gen_fixed_length_string_jtype(15)
+
+# SDWN extensions
+ap_desc = JType('OFSdwnAccessPointDesc') \
+            .op(read='OFSdwnAccessPointDescVer$version.READER.readFrom(bb)', \
+                write='$name.writeTo(bb)')
+
+mcs_rx_mask = JType("McsRxMask") \
+        .op(read="McsRxMask.read10Bytes(bb)", \
+            write="$name.write10Bytes(bb)",\
+            default="McsRxMask.NONE")
+
+ieee80211_ht_cap = JType("OFIeee80211HtCap") \
+            .op(read="OFIeee80211HtCapVer$version.READER.readFrom(bb)",\
+                write="$name.writeTo(bb)")
+
+ieee80211_vht_cap = JType("OFIeee80211VhtCap") \
+            .op(read="OFIeee80211VhtCapVer$version.READER.readFrom(bb)",\
+                write="$name.writeTo(bb)")
+
+mcs_info = JType("OFIeee80211McsInfo") \
+        .op(read="OFIeee80211McsInfoVer$version.READER.readFrom(bb)",\
+            write="$name.writeTo(bb)")
+
+vht_mcs_info = JType("OFIeee80211VhtMcsInfo") \
+        .op(read="OFIeee80211VhtMcsInfoVer$version.READER.readFrom(bb)",\
+            write="$name.writeTo(bb)")
+
 default_mtype_to_jtype_convert_map = {
         'uint8_t' : u8,
         'uint16_t' : u16,
@@ -606,6 +655,8 @@ default_mtype_to_jtype_convert_map = {
         'of_serial_num_t': serial_num,
         'of_port_name_t': port_name,
         'of_table_name_t': table_name,
+        'of_str6_t': str6,
+        'of_str32_t' : str32,
         'of_str64_t': str64,
         'of_ipv4_t': ipv4,
         'of_ipv6_t': ipv6,
@@ -614,6 +665,7 @@ default_mtype_to_jtype_convert_map = {
         'of_oxs_t': oxs,
         'of_meter_features_t': meter_features,
         'of_bitmap_128_t': port_bitmap_128,
+        'of_bitmap_256_t': port_bitmap_256,
         'of_bitmap_512_t': port_bitmap_512,
         'of_checksum_128_t': u128,
         'of_bsn_vport_t': bsn_vport,
@@ -621,7 +673,20 @@ default_mtype_to_jtype_convert_map = {
         'of_controller_status_entry_t' : controller_status_entry,
         'of_time_t' : of_time,
         'of_header_t' : of_message,
-        }
+        # Optical extensions
+        'of_circuit_sig_id_t' : sig_id,
+        'of_odu_sig_id_t' : odu_sig_id,
+        'of_och_sig_id_t' : sig_id,
+        'of_calient_port_desc_stats_entry_t': calient_port_desc_stats_entry,
+        'of_app_code_t' : app_code,
+        # SDWN extensions
+        'of_sdwn_access_point_desc_t' : ap_desc,
+        'of_ieee80211_mcs_rx_mask_t' : mcs_rx_mask,
+        'of_ieee80211_mcs_info_t' : mcs_info,
+        'of_ieee80211_vht_mcs_info_t' : vht_mcs_info,
+        'of_ieee80211_ht_cap_t' : ieee80211_ht_cap,
+        'of_ieee80211_vht_cap_t' : ieee80211_vht_cap,
+	}
 
 ## Map that defines exceptions from the standard loxi->java mapping scheme
 # map of {<loxi_class_name> : { <loxi_member_name> : <JType instance> } }
@@ -698,6 +763,9 @@ exceptions = {
 
         'of_oxm_bsn_in_ports_128' : { 'value': port_bitmap_128 },
         'of_oxm_bsn_in_ports_128_masked' : { 'value': port_bitmap_128, 'value_mask': port_bitmap_128 },
+
+        'of_oxm_bsn_in_ports_256' : { 'value': port_bitmap_256 },
+        'of_oxm_bsn_in_ports_256_masked' : { 'value': port_bitmap_256, 'value_mask': port_bitmap_256 },
 
         'of_oxm_bsn_in_ports_512' : { 'value': port_bitmap_512 },
         'of_oxm_bsn_in_ports_512_masked' : { 'value': port_bitmap_512, 'value_mask': port_bitmap_512 },
@@ -821,7 +889,93 @@ exceptions = {
 
         'of_bundle_add_msg' : { 'data' : of_message },
         'of_flow_stats_request' : { 'out_group' : of_group },
-        'of_flow_lightweight_stats_request' : { 'out_group' : of_group }
+        'of_flow_lightweight_stats_request' : { 'out_group' : of_group },
+
+        # Optical extensions
+	'of_oxm_circuit_och_sigtype' : { 'value' : u8obj },
+	'of_oxm_circuit_och_sigtype_masked' : { 'value' : u8obj, 'value_mask' : u8obj }, 
+	'of_oxm_circuit_och_sigid' : { 'value' : sig_id },
+	'of_oxm_circuit_och_sigid_masked' : { 'value' : sig_id, 'value_mask' : sig_id }, 
+	'of_oxm_circuit_och_sigtype_basic' : { 'value' : u8obj },
+	'of_oxm_circuit_och_sigtype_basic_masked' : { 'value' : u8obj, 'value_mask' : u8obj }, 
+	'of_oxm_circuit_och_sigid_basic' : { 'value' : sig_id },
+	'of_oxm_circuit_och_sigid_basic_masked' : { 'value' : sig_id, 'value_mask' : sig_id }, 
+        'of_oxm_och_sigtype' : { 'value' : u8obj },
+        'of_oxm_och_sigtype_masked' : { 'value' : u8obj, 'value_mask' : u8obj },
+        'of_oxm_och_sigtype_basic' : { 'value' : u8obj },
+        'of_oxm_och_sigtype_basic_masked' : { 'value' : u8obj, 'value_mask' : u8obj },
+        'of_oxm_och_sigid' : {'value' : sig_id },
+        'of_oxm_och_sigid_masked' : {'value' : sig_id, 'value_mask' : sig_id },
+        'of_oxm_och_sigid_basic' : {'value' : sig_id },
+        'of_oxm_och_sigid_basic_masked' : {'value' : sig_id, 'value_mask' : sig_id },
+        'of_oxm_och_sigatt' : { 'value' : u32obj },
+        'of_oxm_och_sigatt_masked' : { 'value' : u32obj, 'value_mask' : u32obj },
+        'of_oxm_och_sigatt_basic' : { 'value' : u32obj },
+        'of_oxm_och_sigatt_basic_masked' : { 'value' : u32obj, 'value_mask' : u32obj },
+        'of_oxm_exp_odu_sigtype' : { 'value' : u8obj },
+        'of_oxm_exp_odu_sigtype_masked' : { 'value' : u8obj, 'value_mask' : u8obj },
+        'of_oxm_exp_och_sigtype' : { 'value' : u8obj },
+        'of_oxm_exp_och_sigtype_masked' : { 'value' : u8obj, 'value_mask' : u8obj },
+
+	# Nicira extensions
+	'of_oxm_nsp' : { 'value' : u32obj },
+	'of_oxm_nsp_masked' : { 'value' : u32obj, 'value_mask' : u32obj },
+	'of_oxm_nsi' : { 'value' : u8obj },
+	'of_oxm_nsi_masked' : { 'value' : u8obj, 'value_mask' : u8obj },
+	'of_oxm_nsh_c1' : { 'value' : u32obj },
+	'of_oxm_nsh_c1_masked' : { 'value' : u32obj, 'value_mask' : u32obj },
+	'of_oxm_nsh_c2' : { 'value' : u32obj },
+	'of_oxm_nsh_c2_masked' : { 'value' : u32obj, 'value_mask' : u32obj },
+	'of_oxm_nsh_c3' : { 'value' : u32obj },
+	'of_oxm_nsh_c3_masked' : { 'value' : u32obj, 'value_mask' : u32obj },
+	'of_oxm_nsh_c4' : { 'value' : u32obj },
+	'of_oxm_nsh_c4_masked' : { 'value' : u32obj, 'value_mask' : u32obj },
+	'of_oxm_nsh_mdtype' : { 'value' : u8obj },
+	'of_oxm_nsh_mdtype_masked' : { 'value' : u8obj, 'value_mask' : u8obj },
+	'of_oxm_nsh_np' : { 'value' : u8obj },
+	'of_oxm_nsh_np_masked' : { 'value' : u8obj, 'value_mask' : u8obj },
+	'of_oxm_encap_eth_src' : { 'value' : mac_addr },
+	'of_oxm_encap_eth_src_masked' : { 'value' : mac_addr, 'value_mask' : mac_addr },
+	'of_oxm_encap_eth_dst' : { 'value' : mac_addr },
+	'of_oxm_encap_eth_dst_masked' : { 'value' : mac_addr, 'value_mask' : mac_addr },
+	'of_oxm_encap_eth_type' : { 'value' : u16obj },
+	'of_oxm_encap_eth_type_masked' : { 'value' : u16obj, 'value_mask' : u16obj },
+	'of_oxm_reg0' : { 'value' : u32obj },
+	'of_oxm_reg0' : { 'value' : u32obj, 'value_mask' : u32obj },
+	'of_oxm_reg1' : { 'value' : u32obj },
+	'of_oxm_reg1' : { 'value' : u32obj, 'value_mask' : u32obj },
+	'of_oxm_reg2' : { 'value' : u32obj },
+	'of_oxm_reg2' : { 'value' : u32obj, 'value_mask' : u32obj },
+	'of_oxm_reg3' : { 'value' : u32obj },
+	'of_oxm_reg3' : { 'value' : u32obj, 'value_mask' : u32obj },
+	'of_oxm_reg4' : { 'value' : u32obj },
+	'of_oxm_reg4' : { 'value' : u32obj, 'value_mask' : u32obj },
+	'of_oxm_reg5' : { 'value' : u32obj },
+	'of_oxm_reg5' : { 'value' : u32obj, 'value_mask' : u32obj },
+	'of_oxm_reg6' : { 'value' : u32obj },
+	'of_oxm_reg6' : { 'value' : u32obj, 'value_mask' : u32obj },
+	'of_oxm_reg7' : { 'value' : u32obj },
+	'of_oxm_reg7' : { 'value' : u32obj, 'value_mask' : u32obj },
+        'of_oxm_tun_flags' : { 'value' : u16obj },
+        'of_oxm_tun_flags_masked' : { 'value' : u16obj, 'value_mask' : u16obj },
+        'of_oxm_tun_gbp_id' : { 'value' : u16obj },
+        'of_oxm_tun_gbp_id_masked' : { 'value' : u16obj, 'value_mask' : u16obj },
+        'of_oxm_tun_gbp_flags' : { 'value' : u8obj },
+        'of_oxm_tun_gbp_flags_masked' : { 'value' : u8obj, 'value_mask' : u8obj },
+        'of_oxm_tun_gpe_np' : { 'value' : u8obj },
+        'of_oxm_tun_gpe_np_masked' : { 'value' : u8obj, 'value_mask' : u8obj },
+        'of_oxm_tun_gpe_flags' : { 'value' : u8obj },
+        'of_oxm_tun_gpe_flags_masked' : { 'value' : u8obj, 'value_mask' : u8obj },
+
+	# OFDPA extensions
+	'of_oxm_ofdpa_qos_index' : { 'value' : u8obj },
+	'of_oxm_ofdpa_qos_index_masked' : { 'value' : u8obj, 'value_mask' : u8obj },
+	'of_oxm_ofdpa_mpls_type' : { 'value' : u16obj },
+	'of_oxm_ofdpa_mpls_type_masked' : { 'value' : u16obj, 'value_mask' : u16obj },
+	'of_oxm_ofdpa_mpls_l2_port' : { 'value' : u32obj },
+	'of_oxm_ofdpa_mpls_l2_port_masked' : { 'value' : u32obj, 'value_mask' : u32obj },
+	'of_oxm_ofdpa_ovid' : { 'value' : u16obj },
+	'of_oxm_ofdpa_ovid_masked' : { 'value' : u16obj , 'value_mask' : u16obj },
 }
 
 

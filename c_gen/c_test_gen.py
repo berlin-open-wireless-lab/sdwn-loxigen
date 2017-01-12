@@ -92,6 +92,8 @@ def var_name_map(m_type):
         of_table_name_t="table_name",
         of_desc_str_t="desc_str",
         of_serial_num_t="ser_num",
+        of_str6_t="str6",
+        of_str32_t="str32",
         of_str64_t="str64",
         of_mac_addr_t="mac_addr",
         of_ipv6_t="ipv6",
@@ -105,8 +107,22 @@ def var_name_map(m_type):
         # BSN extensions
         of_bsn_vport_q_in_q_t="vport",
         of_bitmap_128_t="bitmap_128",
+        of_bitmap_256_t="bitmap_256",
         of_bitmap_512_t="bitmap_512",
         of_checksum_128_t="checksum_128",
+        # Optical extensions
+        of_app_code_t="app_code",
+        of_circuit_sig_id_t="sig_id",
+        of_calient_port_desc_stats_entry_t="calient_port_desc_stats_entry",
+        of_och_sig_id_t="och_sig_id",
+        of_odu_sig_id_t="odu_sig_id",
+        # SDWN extension
+        of_sdwn_access_point_desc_t="ap_desc",
+        of_ieee80211_mcs_rx_mask_t="mcs_rx_mask",
+        of_ieee80211_mcs_info_t="mcs_info",
+        of_ieee80211_vht_mcs_info_t="vht_mcs_info",
+        of_ieee80211_ht_cap_t="ht_cap",
+        of_ieee80211_vht_cap_t="vht_cap",
         )
 
     if m_type.find("of_list_") == 0:
@@ -120,8 +136,11 @@ integer_types = ["uint8_t", "uint16_t", "uint32_t", "uint64_t",
                  "of_match_bmap_t", "of_ipv4_t"]
 string_types = [ "of_port_name_t", "of_table_name_t",
                 "of_desc_str_t", "of_serial_num_t", "of_mac_addr_t",
-                "of_ipv6_t", "of_bitmap_128_t", "of_checksum_128_t",
-                "of_str64_t", "of_bitmap_512_t"]
+                "of_ipv6_t", "of_bitmap_128_t", "of_bitmap_256_t",
+                "of_bitmap_512_t", "of_checksum_128_t", "of_str6_t",
+                "of_str32_t", "of_str64_t", "of_app_code_t",
+                "of_sig_id_t", "of_och_sig_id_t", "of_odu_sig_id_t"
+                ]
 
 scalar_types = integer_types[:]
 scalar_types.extend(string_types)

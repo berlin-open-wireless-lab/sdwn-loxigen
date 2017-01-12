@@ -90,7 +90,14 @@ typedef int (*loci_obj_dump_f)(loci_writer_f writer, void *cookie, of_object_t *
 #define LOCI_DUMP_tab_name(writer, cookie, val) LOCI_DUMP_string(writer, cookie, val)
 #define LOCI_DUMP_desc_str(writer, cookie, val) LOCI_DUMP_string(writer, cookie, val)
 #define LOCI_DUMP_ser_num(writer, cookie, val) LOCI_DUMP_string(writer, cookie, val)
+#define LOCI_DUMP_str6(writer, cookie, val) LOCI_DUMP_string(writer, cookie, val)
+#define LOCI_DUMP_str32(writer, cookie, val) LOCI_DUMP_string(writer, cookie, val)
 #define LOCI_DUMP_str64(writer, cookie, val) LOCI_DUMP_string(writer, cookie, val)
+#define LOCI_DUMP_app_code(writer, cookie, val) LOCI_DUMP_string(writer, cookie, val)
+// FIXME: these need overhaul
+#define LOCI_DUMP_circuit_sig_id(writer, cookie, val) LOCI_DUMP_string(writer, cookie, val)
+#define LOCI_DUMP_och_sig_id(writer, cookie, val) LOCI_DUMP_string(writer, cookie, val)
+#define LOCI_DUMP_odu_sig_id(writer, cookie, val) LOCI_DUMP_string(writer, cookie, val)
 
 int loci_dump_match(loci_writer_f writer, void* cookie, of_match_t *match);
 #define LOCI_DUMP_match(writer, cookie, val) loci_dump_match(writer, cookie, &val)
@@ -99,7 +106,13 @@ int loci_dump_match(loci_writer_f writer, void* cookie, of_match_t *match);
 
 #define LOCI_DUMP_checksum_128(writer, cookie, val) writer(cookie, "%016" PRIx64 "%016" PRIx64, (val).hi, (val).lo)
 
+#define LOCI_DUMP_bitmap_256(writer, cookie, val) writer(cookie, "%" PRIx64 "%" PRIx64 "%" PRIx64 "%" PRIx64, (val).words[3], (val).words[2], (val).words[1], (val).words[0])
 #define LOCI_DUMP_bitmap_512(writer, cookie, val) writer(cookie, "%" PRIx64 "%" PRIx64 "%" PRIx64 "%" PRIx64 "%" PRIx64 "%" PRIx64 "%" PRIx64 "%" PRIx64, (val).words[7], (val).words[6], (val).words[5], (val).words[4], (val).words[3], (val).words[2], (val).words[1], (val).words[0])
+
+#define LOCI_DUMP_mcs_rx_mask(writer, cookie, val) writer(cookie, "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",\
+                                                                 (val).bytes[0], (val).bytes[1], (val).bytes[2], (val).bytes[3],\
+                                                                 (val).bytes[4], (val).bytes[5], (val).bytes[6], (val).bytes[7],\
+                                                                 (val).bytes[8], (val).bytes[9])
 
 /**
  * Generic version for any object

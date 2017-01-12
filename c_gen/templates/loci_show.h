@@ -104,7 +104,15 @@ typedef int (*loci_obj_show_f)(loci_writer_f writer,
 #define LOCI_SHOW_tab_name(writer, cookie, val) LOCI_SHOW_string(writer, cookie, val)
 #define LOCI_SHOW_desc_str(writer, cookie, val) LOCI_SHOW_string(writer, cookie, val)
 #define LOCI_SHOW_ser_num(writer, cookie, val) LOCI_SHOW_string(writer, cookie, val)
+#define LOCI_SHOW_str6(writer, cookie, val) LOCI_SHOW_string(writer, cookie, val)
+#define LOCI_SHOW_str32(writer, cookie, val) LOCI_SHOW_string(writer, cookie, val)
 #define LOCI_SHOW_str64(writer, cookie, val) LOCI_SHOW_string(writer, cookie, val)
+#define LOCI_SHOW_app_code(writer, cookie, val) LOCI_SHOW_string(writer, cookie, val)
+
+// FIXME: these need overhaul
+#define LOCI_SHOW_circuit_sig_id(writer, cookie, val) LOCI_SHOW_string(writer, cookie, val)
+#define LOCI_SHOW_odu_sig_id(writer, cookie, val) LOCI_SHOW_string(writer, cookie, val)
+#define LOCI_SHOW_och_sig_id(writer, cookie, val) LOCI_SHOW_string(writer, cookie, val)
 
 int loci_show_match(loci_writer_f writer, void *cookie, of_match_t *match);
 #define LOCI_SHOW_match(writer, cookie, val) loci_show_match(writer, cookie, &val)
@@ -113,8 +121,14 @@ int loci_show_match(loci_writer_f writer, void *cookie, of_match_t *match);
 
 #define LOCI_SHOW_checksum_128(writer, cookie, val) writer(cookie, "%016" PRIx64 "%016" PRIx64, (val).hi, (val).lo)
 
+#define LOCI_SHOW_bitmap_256(writer, cookie, val) writer(cookie, "%" PRIx64 "%" PRIx64 "%" PRIx64 "%" PRIx64, (val).words[3], (val).words[2], (val).words[1], (val).words[0])
 #define LOCI_SHOW_bitmap_512(writer, cookie, val) writer(cookie, "%" PRIx64 "%" PRIx64 "%" PRIx64 "%" PRIx64 "%" PRIx64 "%" PRIx64 "%" PRIx64 "%" PRIx64, (val).words[7], (val).words[6], (val).words[5], (val).words[4], (val).words[3], (val).words[2], (val).words[1], (val).words[0])
 
+
+#define LOCI_SHOW_mcs_rx_mask(writer, cookie, val) writer(cookie, "%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",\
+                                                                 (val).bytes[0], (val).bytes[1], (val).bytes[2], (val).bytes[3],\
+                                                                 (val).bytes[4], (val).bytes[5], (val).bytes[6], (val).bytes[7],\
+                                                                 (val).bytes[8], (val).bytes[9])
 /**
  * Generic version for any object
  */
