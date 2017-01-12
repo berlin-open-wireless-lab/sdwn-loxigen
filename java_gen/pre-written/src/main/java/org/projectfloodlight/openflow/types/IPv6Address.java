@@ -28,7 +28,7 @@ import com.google.common.primitives.UnsignedLongs;
  * @author Andreas Wundsam {@literal <}andreas.wundsam@teleteach.de{@literal >}
  */
 public class IPv6Address extends IPAddress<IPv6Address> implements Writeable {
-    static final int LENGTH = 16;
+    public static final int LENGTH = 16;
     private final long raw1;
     private final long raw2;
 
@@ -176,6 +176,8 @@ public class IPv6Address extends IPAddress<IPv6Address> implements Writeable {
      *
      * <p>This method assumes the second (lower-order) 64-bit block to be
      * a 64-bit interface identifier, which may not always be true.
+     * @param macAddress the MAC address to check
+     * @return boolean true or false
      */
     public boolean isModifiedEui64Derived(@Nonnull MacAddress macAddress) {
         return raw2 == toModifiedEui64(macAddress);
@@ -412,6 +414,10 @@ public class IPv6Address extends IPAddress<IPv6Address> implements Writeable {
      *
      * @throws IllegalArgumentException if the specified network does not
      *         meet the aforementioned requirements
+     * @param network the IPv6 network
+     * @param macAddress the MAC address
+     * @return an {@code IPv6Address} object that represents the given
+     * MAC address in the specified network
      */
     @Nonnull
     public static IPv6Address of(
@@ -555,7 +561,11 @@ public class IPv6Address extends IPAddress<IPv6Address> implements Writeable {
             throw new IllegalArgumentException("16 bit word index must be in [0,7]");
     }
 
-    /** get the index of the first word where to apply IPv6 zero compression */
+    /** 
+     * get the index of the first word where to apply IPv6 zero compression 
+     *
+     * @return the index
+     */
     public int getZeroCompressStart() {
         int start = Integer.MAX_VALUE;
         int maxLength = -1;
@@ -568,7 +578,7 @@ public class IPv6Address extends IPAddress<IPv6Address> implements Writeable {
                 if (getUnsignedShortWord(i) != 0) {
                     // end of this candidate word
                     int candidateLength = i - candidateStart;
-                    if (candidateLength >= maxLength) {
+                    if ((candidateLength > 1) && (candidateLength > maxLength)) {
                         start = candidateStart;
                         maxLength = candidateLength;
                     }
@@ -584,7 +594,7 @@ public class IPv6Address extends IPAddress<IPv6Address> implements Writeable {
 
         if (candidateStart >= 0) {
             int candidateLength = 8 - candidateStart;
-            if (candidateLength >= maxLength) {
+            if ((candidateLength > 1) && (candidateLength > maxLength)) {
                 start = candidateStart;
                 maxLength = candidateLength;
             }
